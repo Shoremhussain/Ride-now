@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ride Now</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5;
+      padding-bottom: 60px;
+    }
+    header {
+      background-color: black; color: white; padding: 15px; text-align: center;
+    }
+    .page { display: none; padding: 20px; }
+    .visible { display: block; }
+    input, button {
+      width: 100%; padding: 10px; margin: 10px 0; font-size: 16px;
+    }
+    .ride-option {
+      border: 1px solid #ccc; border-radius: 8px; padding: 15px;
+      margin: 10px 0; background-color: #fff;
+    }
+    .ride-option img {
+      width: 100%; height: auto; border-radius: 6px; margin-bottom: 10px;
+    }
+    .payment-option {
+      background-color: #e0f7fa; margin: 10px 0; padding: 15px;
+      border-radius: 6px; cursor: pointer; text-align: left;
+      display: flex; align-items: center;
+    }
+    .payment-option img {
+      width: 30px; height: 30px; margin-right: 10px;
+    }
+    .road {
+      width: 100%; height: 150px; background: #444; position: relative;
+      overflow: hidden; border-radius: 10px; margin-top: 20px;
+    }
+    .car {
+      width: 100px; position: absolute; bottom: 10px;
+      animation: drive 5s linear infinite;
+    }
+    @keyframes drive {
+      0% { left: -120px; }
+      100% { left: 100%; }
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #000;
+      color: #fff;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Ride Now</h1>
+  </header>
+
+  <!-- Login Page -->
+  <div id="loginPage" class="page visible">
+    <h2>Login</h2>
+    <input type="text" id="name" placeholder="Enter your name" />
+    <input type="email" id="email" placeholder="Enter your email" />
+    <input type="number" id="age" placeholder="Enter your age" />
+    <input type="text" id="profession" placeholder="Enter your profession" />
+    <input type="password" id="password" placeholder="Enter your password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- Location Page -->
+  <div id="locationPage" class="page">
+    <h2>Enter Ride Details</h2>
+    <input type="text" id="pickup" placeholder="Enter pickup location" />
+    <input type="text" id="drop" placeholder="Enter drop location" />
+    <button onclick="goToRides()">Continue</button>
+  </div>
+
+  <!-- Ride Selection Page -->
+  <div id="ridePage" class="page">
+    <h2>Select a Ride</h2>
+    <div id="rideOptions"></div>
+  </div>
+
+  <!-- Payment Page -->
+  <div id="paymentPage" class="page">
+    <h2>Choose Payment Method</h2>
+    <div class="payment-option" onclick="confirmRide('Google Pay')">
+      <img src="https://img.icons8.com/color/48/000000/google-pay-india.png" alt="Google Pay"/>
+      Google Pay
+    </div>
+    <div class="payment-option" onclick="confirmRide('UPI')">
+      <img src="https://img.icons8.com/color/48/000000/upi.png" alt="UPI"/>
+      UPI
+    </div>
+    <div class="payment-option" onclick="confirmRide('Credit Card')">
+      <img src="https://img.icons8.com/color/48/000000/bank-card-back-side.png" alt="Credit Card"/>
+      Credit Card
+    </div>
+  </div>
+
+  <!-- Confirmation Page -->
+  <div id="confirmationPage" class="page">
+    <h2>Ride Confirmed!</h2>
+    <p>Your ride is coming soon...</p>
+    <div class="road">
+      <img class="car" src="https://cdn.pixabay.com/photo/2013/07/13/10/21/sports-car-156681_1280.png" alt="Car"/>
+    </div>
+  </div>
+
+  <footer>
+    Created by Mujtaba
+  </footer>
+
+  <script>
+    const rides = [
+      {
+        name: "Lamborghini",
+        model: "Aventador",
+        desc: "Luxury sports car",
+        fare: 500,
+        img: "https://images.unsplash.com/photo-1613459627355-1c9f9b72ff3f?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Bugatti",
+        model: "Chiron",
+        desc: "Super fast hypercar",
+        fare: 700,
+        img: "https://images.unsplash.com/photo-1625038453509-00d0f196c45d?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Helicopter",
+        model: "Airbus H130",
+        desc: "Fly above traffic",
+        fare: 1500,
+        img: "https://images.unsplash.com/photo-1568651168669-97c1b06f6c7e?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Rolls-Royce",
+        model: "Phantom",
+        desc: "Ultimate luxury",
+        fare: 600,
+        img: "https://images.unsplash.com/photo-1608480030711-47998ac9f79e?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        name: "Auto",
+        model: "Bajaj RE",
+        desc: "Affordable local ride",
+        fare: 50,
+        img: "https://images.unsplash.com/photo-1592829604477-03e9e6804e7f?auto=format&fit=crop&w=800&q=80"
+      }
+    ];
+    const locations = ["Airport", "City Mall", "Downtown", "Tech Park", "Central Station"];
+    let selectedRide = "";
+
+    function switchPage(from, to) {
+      document.getElementById(from).classList.remove("visible");
+      document.getElementById(to).classList.add("visible");
+    }
+
+    function login() {
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const age = document.getElementById("age").value;
+      const profession = document.getElementById("profession").value;
+      const password = document.getElementById("password").value;
+
+      if (name && email && age && profession && password) {
+        // NOTE: No backend/email send here — requires server setup
+        switchPage("loginPage", "locationPage");
+      } else {
+        alert("Please fill all fields.");
+      }
+    }
+
+    function goToRides() {
+      const pickup = document.getElementById("pickup").value;
+      const drop = document.getElementById("drop").value;
+      if (pickup && drop) {
+        switchPage("locationPage", "ridePage");
+        showRides();
+      } else {
+        alert("Please enter both pickup and drop locations.");
+      }
+    }
+
+    function showRides() {
+      const container = document.getElementById("rideOptions");
+      container.innerHTML = "";
+      rides.forEach(ride => {
+        const location = locations[Math.floor(Math.random() * locations.length)];
+        const div = document.createElement("div");
+        div.className = "ride-option";
+        div.innerHTML = `
+          <img src="${ride.img}" alt="${ride.name}" />
+          <h3>${ride.name} (${ride.model})</h3>
+          <p><strong>Location:</strong> ${location}</p>
+          <p><strong>Description:</strong> ${ride.desc}</p>
+          <p><strong>Fare:</strong> ₹${ride.fare}</p>
+          <button onclick="selectRide('${ride.name}')">Book ${ride.name}</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function selectRide(name) {
+      selectedRide = name;
+      switchPage("ridePage", "paymentPage");
+    }
+
+    function confirmRide(method) {
+      alert(`Payment via ${method} successful!`);
+      switchPage("paymentPage", "confirmationPage");
+    }
+  </script>
+
+</body>
+</html>
